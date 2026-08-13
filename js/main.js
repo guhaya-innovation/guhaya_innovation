@@ -127,18 +127,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ---------- contact form (static demo submit) ---------- */
-  const form = document.querySelector('#contact-form');
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const success = document.querySelector('.form-success');
-      form.reset();
-      if (success) {
-        success.classList.add('show');
-        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+/* ---------- contact form (Formspree) ---------- */
+const form = document.querySelector('#contact-form');
+
+if (form) {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const success = document.querySelector('.form-success');
+    const button = form.querySelector('button[type="submit"]');
+
+    button.disabled = true;
+    button.innerHTML = 'Sending...';
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        form.reset();
+
+        if (success) {
+          success.classList.add('show');
+          success.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }
+
+        button.disabled = false;
+        button.innerHTML = 'Send Enquiry <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      } else {
+        throw new Error('Form submission failed');
       }
-    });
-  }
+
+    } catch (error) {
+      button.disabled = false;
+      button.innerHTML = 'Send Enquiry <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+      alert('Sorry, there was a problem sending your enquiry. Please try again.');
+    }
+  });
+}
 
 });
